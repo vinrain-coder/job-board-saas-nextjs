@@ -55,7 +55,7 @@ export function UserDropdown({ email, name, image }: iAppProps) {
         <DropdownMenuItem asChild>
           <form
             action={async () => {
-              "use sever";
+              "use server";
 
               await signOut({ redirectTo: "/" });
             }}
