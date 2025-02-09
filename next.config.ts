@@ -7,6 +7,15 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  images: {
+    remotePatterns: [
+      {
+        hostname: "utfs.io",
+        port: "",
+        protocol: "https",
+      },
+    ],
+  },
 };
 
 export default nextConfig;
