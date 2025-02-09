@@ -34,6 +34,7 @@ enum UserType {
 
 model Company {
   id       String  @id @default(cuid())
+  logo     String
   name     String
   location String
   about    String
