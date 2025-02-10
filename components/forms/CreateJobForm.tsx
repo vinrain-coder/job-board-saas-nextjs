@@ -27,12 +27,12 @@ import {
 import { countryList } from "@/app/utils/countriesList";
 import { SalaryRangeSelector } from "../general/SalaryRangeSelector";
 import { JobDescriptionEditor } from "../richTextEditor/JobDescriptionEditor";
-import { BenefitsSelector } from "../general/BenefitsSelector";
 import { Textarea } from "../ui/textarea";
 import Image from "next/image";
 import { Button } from "../ui/button";
 import { X } from "lucide-react";
 import { UploadDropzone } from "../general/UploadThingReexported";
+import BenefitsSelector from "../general/BenefitsSelector";
 
 export function CreateJobForm() {
   const form = useForm<z.infer<typeof jobSchema>>({
