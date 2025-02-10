@@ -92,7 +92,7 @@ export function CreateJobForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="col-span-1 lg:col-span-2 flex flex-col gap-8 mb-4"
+        className="col-span-1 lg:col-span-2 flex flex-col gap-8"
       >
         <Card>
           <CardHeader>
