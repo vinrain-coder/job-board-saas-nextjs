@@ -1,5 +1,4 @@
 /* eslint-disable react/no-unescaped-entities */
-import { CreateJobForm } from "@/components/forms/CreateJobForm";
 import {
   Card,
   CardContent,
@@ -7,84 +6,124 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-import ArcjetLogo from "@/public/arcjet.jpg";
+import React from "react";
+import ArcJetLogo from "@/public/arcjet.jpg";
 import InngestLogo from "@/public/inngest-locale.png";
 import Image from "next/image";
+import { CreateJobForm } from "@/components/forms/CreateJobForm";
+import { prisma } from "@/app/utils/db";
+import { redirect } from "next/navigation";
+import { requireUser } from "@/app/utils/requireUser";
 
 const companies = [
-  { id: 0, name: "Arcjet", logo: ArcjetLogo },
+  { id: 0, name: "ArcJet", logo: ArcJetLogo },
   { id: 1, name: "Inngest", logo: InngestLogo },
-  { id: 2, name: "Arcjet", logo: ArcjetLogo },
+  { id: 2, name: "ArcJet", logo: ArcJetLogo },
   { id: 3, name: "Inngest", logo: InngestLogo },
-  { id: 4, name: "Arcjet", logo: ArcjetLogo },
+  { id: 4, name: "ArcJet", logo: ArcJetLogo },
   { id: 5, name: "Inngest", logo: InngestLogo },
 ];
 
 const testimonials = [
   {
     quote:
-      "We found our ideal candidate within 48 hours of posting. The qualty of appilicants was exceptional",
-    author: "Vin Rain",
-    company: "Vin LLC",
+      "We found our ideal candidate within 48 hours of posting. The quality of applicants was exceptional!",
+    author: "Sarah Chen",
+    company: "TechCorp",
   },
   {
     quote:
-      "We found our ideal candidate within 48 hours of posting. The qualty of appilicants was exceptional",
-    author: "Vin Rain",
-    company: "Vin LLC",
+      "The platform made hiring remote talent incredibly simple. Highly recommended!",
+    author: "Mark Johnson",
+    company: "StartupX",
   },
   {
     quote:
-      "We found our ideal candidate within 48 hours of posting. The qualty of appilicants was exceptional",
-    author: "Vin Rain",
-    company: "Vin LLC",
+      "We've consistently found high-quality candidates here. It's our go-to platform for all our hiring needs.",
+    author: "Emily Rodriguez",
+    company: "InnovateNow",
   },
 ];
 
 const stats = [
-  { id: 0, value: "10K+", label: "Monthly active job seekers" },
-  { id: 1, value: "48h", label: "Average timre to hire" },
-  { id: 2, value: "95%", label: "Employer satisfaction ratte" },
-  { id: 3, value: "500+", label: "Companies hiring remotely" },
+  { value: "10k+", label: "Monthly active job seekers" },
+  { value: "48h", label: "Average time to hire" },
+  { value: "95%", label: "Employer satisfaction rate" },
+  { value: "500+", label: "Companies hiring monthly" },
 ];
 
-export default function PostJobPage() {
+async function getCompany(userId: string) {
+  const data = await prisma.company.findUnique({
+    where: {
+      userId: userId,
+    },
+    select: {
+      name: true,
+      location: true,
+      about: true,
+      logo: true,
+      xAccount: true,
+      website: true,
+    },
+  });
+
+  if (!data) {
+    return redirect("/");
+  }
+  return data;
+}
+
+const PostJobPage = async () => {
+  const session = await requireUser();
+  const data = await getCompany(session.id as string);
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-5">
-      <CreateJobForm/>
+      <CreateJobForm
+        companyAbout={data.about}
+        companyLocation={data.location}
+        companyLogo={data.logo}
+        companyName={data.name}
+        companyXAccount={data.xAccount}
+        companyWebsite={data.website}
+      />
+
       <div className="col-span-1">
-        <Card>
+        <Card className="lg:sticky lg:top-4">
           <CardHeader>
             <CardTitle className="text-xl">
               Trusted by Industry Leaders
             </CardTitle>
             <CardDescription>
-              JOin Thousands of Companies Hiring top Tallents
+              Join thousands of companies hiring top talent
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* company logos */}
+            {/* Company Logos */}
             <div className="grid grid-cols-3 gap-4">
               {companies.map((company) => (
-                <div className="" key={company.id}>
+                <div
+                  key={company.id}
+                  className="flex items-center justify-center"
+                >
                   <Image
                     src={company.logo}
                     alt={company.name}
-                    width={80}
                     height={80}
-                    className="rounded-lg opacity-75 transition-opacity hover:opacity-100"
-                  />
+                    width={80}
+                    className="opacity-75 transition-opacity hover:opacity-100 rounded-lg"
+                  />{" "}
                 </div>
               ))}
             </div>
+
+            {/* Testimonials */}
             <div className="space-y-4">
               {testimonials.map((testimonial, index) => (
                 <blockquote
                   key={index}
                   className="border-l-2 border-primary pl-4"
                 >
-                  <p className="text-sm text-muted-foreground italic">
+                  <p className="text-sm italic text-muted-foreground">
                     "{testimonial.quote}"
                   </p>
                   <footer className="mt-2 text-sm font-medium">
@@ -94,12 +133,14 @@ export default function PostJobPage() {
               ))}
             </div>
 
-            {/* Render stats here */}
-            <div className="">
-              {stats.map((stat) => (
-                <div className="rounded-lg bg-muted p-4" key={stat.id}>
-                  <h4 className="text-2xl font-bold">{stat.value}</h4>
-                  <p className="text-sm text-muted-foreground">{stat.label}</p>
+            {/* Stats */}
+            <div className="grid grid-cols-2 gap-4">
+              {stats.map((stat, index) => (
+                <div key={index} className="rounded-lg bg-muted p-4">
+                  <div className="text-2xl font-bold">{stat.value}</div>
+                  <div className="text-sm text-muted-foreground">
+                    {stat.label}
+                  </div>
                 </div>
               ))}
             </div>
@@ -108,4 +149,6 @@ export default function PostJobPage() {
       </div>
     </div>
   );
-}
+};
+
+export default PostJobPage;

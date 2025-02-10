@@ -33,30 +33,67 @@ import { Button } from "../ui/button";
 import { X } from "lucide-react";
 import { UploadDropzone } from "../general/UploadThingReexported";
 import BenefitsSelector from "../general/BenefitsSelector";
+import { JobListingDurationSelector } from "../general/JobListingDurationSelector";
+import { createJob } from "@/app/actions";
+import { useState } from "react";
 
-export function CreateJobForm() {
+interface iAppProps {
+  companyName: string;
+  companyLogo: string;
+  companyLocation: string;
+  companyAbout: string;
+  companyWebsite: string;
+  companyXAccount: string | null;
+}
+
+export function CreateJobForm({
+  companyLocation,
+  companyLogo,
+  companyName,
+  companyWebsite,
+  companyXAccount,
+}: iAppProps) {
   const form = useForm<z.infer<typeof jobSchema>>({
     resolver: zodResolver(jobSchema),
     defaultValues: {
       benefits: [],
       companyDescription: "",
-      companyLocation: "",
-      companyName: "",
-      companyWebsite: "",
-      companyXAccount: "",
+      companyLocation: companyLocation,
+      companyLogo: companyLogo,
+      companyName: companyName,
+      companyWebsite: companyWebsite,
+      companyXAccount: companyXAccount || "",
       employmentType: "",
       jobDescription: "",
       jobTitle: "",
       location: "",
       salaryFrom: 0,
       salaryTo: 0,
-      companyLogo: "",
       listingDuration: 30,
     },
   });
+
+  const [pending, setPending] = useState(false);
+
+  async function onSubmit(values: z.infer<typeof jobSchema>) {
+    try {
+      setPending(true);
+      await createJob(values);
+    } catch (error) {
+      if (error instanceof Error && error.message !== "NEXT_REDIRECT") {
+        console.log("Something went wrong");
+      }
+    } finally {
+      setPending(false);
+    }
+  }
+  
   return (
     <Form {...form}>
-      <form className="col-span-1 lg:col-span-2 flex flex-col gap-8">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="col-span-1 lg:col-span-2 flex flex-col gap-8"
+      >
         <Card>
           <CardHeader>
             <CardTitle>Job Information</CardTitle>
@@ -201,6 +238,7 @@ export function CreateJobForm() {
                     <FormControl>
                       <Input placeholder="Company name" {...field} />
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -253,6 +291,7 @@ export function CreateJobForm() {
                     <FormControl>
                       <Input placeholder="Company website" {...field} />
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -265,6 +304,7 @@ export function CreateJobForm() {
                     <FormControl>
                       <Input placeholder="Company X Account" {...field} />
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -282,6 +322,7 @@ export function CreateJobForm() {
                       className="min-h-[120px]"
                     />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -326,12 +367,36 @@ export function CreateJobForm() {
                       )}
                     </div>
                   </FormControl>
+
                   <FormMessage />
                 </FormItem>
               )}
             />
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Job Listing Duration</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <FormField
+              control={form.control}
+              name="listingDuration"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <JobListingDurationSelector field={field as any} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </CardContent>
+        </Card>
+        <Button type="submit" className="w-full" disabled={pending}>
+          {pending ? "Submitting" : "Create Job Post"}
+        </Button>
       </form>
     </Form>
   );
