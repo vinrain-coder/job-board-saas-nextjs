@@ -1,4 +1,4 @@
-import { auth } from "@/utils/auth";
+import { auth } from "@/app/utils/auth";
 import { redirect } from "next/navigation";
 
 export async function requireUser() {

@@ -1,5 +1,5 @@
 import { OnboardingForm } from "@/components/forms/onboarding/OnboardingForm";
-import { prisma } from "@/utils/db";
+import { prisma } from "@/app/utils/db";
 import { redirect } from "next/navigation";
 import { requireUser } from "../utils/requireUser";
 

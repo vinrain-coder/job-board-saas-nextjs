@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { companySchema } from "@/utils/zodSchemas";
+import { companySchema } from "@/app/utils/zodSchemas";
 import { z } from "zod";
 import {
   Form,

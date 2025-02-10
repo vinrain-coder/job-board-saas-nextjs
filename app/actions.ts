@@ -2,8 +2,8 @@
 
 import { z } from "zod";
 import { requireUser } from "./utils/requireUser";
-import { companySchema, jobSeekerSchema } from "@/utils/zodSchemas";
-import { prisma } from "@/utils/db";
+import { companySchema, jobSeekerSchema } from "@/app/utils/zodSchemas";
+import { prisma } from "@/app/utils/db";
 import { redirect } from "next/navigation";
 import arcjet, { detectBot, shield } from "./utils/arcjet";
 import { request } from "@arcjet/next";

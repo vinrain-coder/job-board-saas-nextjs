@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import Link from "next/link";
-import { signOut } from "@/utils/auth";
+import { signOut } from "@/app/utils/auth";
 
 interface iAppProps {
   email: string;

@@ -1,4 +1,4 @@
-import { auth, signIn } from "@/utils/auth";
+import { auth, signIn } from "@/app/utils/auth";
 import {
   Card,
   CardContent,
