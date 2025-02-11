@@ -4,7 +4,7 @@ import React from "react";
 
 const LoadingFile = () => {
   return (
-    <div className="col-span-1 lg:col-span-2 flex flex-col gap-8">
+    <div className="col-span-1 lg:col-span-2 flex flex-col gap-8 mb-4">
       <Card>
         <CardHeader>
           <CardTitle>Job Information</CardTitle>
