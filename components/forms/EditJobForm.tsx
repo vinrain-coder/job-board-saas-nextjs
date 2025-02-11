@@ -24,6 +24,7 @@ import { Textarea } from "../ui/textarea";
 import { XIcon } from "lucide-react";
 import { Button } from "../ui/button";
 import Image from "next/image";
+import { toast } from "sonner";
 import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -31,46 +32,50 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { jobSchema } from "@/app/utils/zodSchemas";
 import { SalaryRangeSelector } from "../general/SalaryRangeSelector";
 import BenefitsSelector from "../general/BenefitsSelector";
-import { JobListingDurationSelector } from "../general/JobListingDurationSelector";
-import { createJob } from "@/app/actions";
+import { updateJobPost } from "@/app/actions";
 import { UploadDropzone } from "../general/UploadThingReexported";
-import { toast } from "sonner";
 import JobDescriptionEditor from "../richTextEditor/JobDescriptionEditor";
 
-interface CreateJobFormProps {
-  companyName: string;
-  companyLocation: string;
-  companyAbout: string;
-  companyLogo: string;
-  companyXAccount: string | null;
-  companyWebsite: string;
+interface iAppProps {
+  jobPost: {
+    jobTitle: string;
+    id: string;
+    employmentType: string;
+    location: string;
+    salaryFrom: number;
+    salaryTo: number;
+    jobDescription: string;
+    benefits: string[];
+    listingDuration: number;
+    company: {
+      location: string;
+      name: string;
+      logo: string;
+      website: string;
+      xAccount: string | null;
+      about: string;
+    };
+  };
 }
 
-export function CreateJobForm({
-  companyAbout,
-  companyLocation,
-  companyLogo,
-  companyXAccount,
-  companyName,
-  companyWebsite,
-}: CreateJobFormProps) {
+export function EditJobForm({ jobPost }: iAppProps) {
   const form = useForm<z.infer<typeof jobSchema>>({
     resolver: zodResolver(jobSchema),
     defaultValues: {
-      benefits: [],
-      companyDescription: companyAbout,
-      companyLocation: companyLocation,
-      companyName: companyName,
-      companyWebsite: companyWebsite,
-      companyXAccount: companyXAccount || "",
-      employmentType: "",
-      jobDescription: "",
-      jobTitle: "",
-      location: "",
-      salaryFrom: 0,
-      salaryTo: 0,
-      companyLogo: companyLogo,
-      listingDuration: 30,
+      benefits: jobPost.benefits,
+      companyDescription: jobPost.company.about,
+      companyLocation: jobPost.company.location,
+      companyName: jobPost.company.name,
+      companyWebsite: jobPost.company.website,
+      companyXAccount: jobPost.company.xAccount || "",
+      employmentType: jobPost.employmentType,
+      jobDescription: jobPost.jobDescription,
+      jobTitle: jobPost.jobTitle,
+      location: jobPost.location,
+      salaryFrom: jobPost.salaryFrom,
+      salaryTo: jobPost.salaryTo,
+      companyLogo: jobPost.company.logo,
+      listingDuration: jobPost.listingDuration,
     },
   });
 
@@ -79,9 +84,11 @@ export function CreateJobForm({
     try {
       setPending(true);
 
-      await createJob(values);
-    } catch {
-      toast.error("Something went wrong. Please try again.");
+      await updateJobPost(values, jobPost.id);
+    } catch (error) {
+      if (error instanceof Error && error.message !== "NEXT_REDIRECT") {
+        toast.error("Something went wrong. Please try again.");
+      }
     } finally {
       setPending(false);
     }
@@ -406,25 +413,6 @@ export function CreateJobForm({
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Job Listing Duration</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <FormField
-              control={form.control}
-              name="listingDuration"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <JobListingDurationSelector field={field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </CardContent>
-        </Card>
         <Button type="submit" className="w-full" disabled={pending}>
           {pending ? "Submitting..." : "Continue"}
         </Button>

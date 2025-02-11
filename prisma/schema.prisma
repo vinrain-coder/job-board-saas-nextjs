@@ -1,67 +1,34 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
-
 model User {
-  id            String    @id @default(cuid())
+  id            String          @id @default(cuid())
   name          String?
-  email         String    @unique
+  email         String          @unique
   emailVerified DateTime?
   image         String?
   accounts      Account[]
   sessions      Session[]
-
-  stripeCustomerId String? @unique
-
-  userType UserType?
+  // Optional for WebAuthn support
+  Authenticator Authenticator[]
 
   onboardingCompleted Boolean @default(false)
 
-  Company   Company?
-  JobSeeker JobSeeker?
+  userType UserType?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
+  stripeCustomerId String? @unique
 
-enum UserType {
-  COMPANY
-  JOB_SEEKER
-}
-
-model Company {
-  id       String  @id @default(cuid())
-  logo     String
-  name     String
-  location String
-  about    String
-  website  String
-  xAccount String?
-
-  JObPost JobPost[]
-
-  user   User   @relation(fields: [userId], references: [id])
-  userId String @unique
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model JobSeeker {
-  id     String @id @default(cuid())
-  name   String
-  about  String
-  resume String
-  user   User   @relation(fields: [userId], references: [id])
-  userId String @unique
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  Company      Company?
+  JobSeeker    JobSeeker?
+  SavedJobPost SavedJobPost[]
 }
 
 model Account {
@@ -103,8 +70,58 @@ model VerificationToken {
   @@id([identifier, token])
 }
 
+// Optional for WebAuthn support
+model Authenticator {
+  credentialID         String  @unique
+  userId               String
+  providerAccountId    String
+  credentialPublicKey  String
+  counter              Int
+  credentialDeviceType String
+  credentialBackedUp   Boolean
+  transports           String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, credentialID])
+}
+
+enum UserType {
+  COMPANY
+  JOB_SEEKER
+}
+
+model Company {
+  id String @id @default(uuid())
+
+  name     String
+  location String
+  logo     String
+  website  String
+  xAccount String?
+  about    String
+  user     User    @relation(fields: [userId], references: [id])
+  userId   String  @unique
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  JobPost   JobPost[]
+}
+
+model JobSeeker {
+  id     String @id @default(uuid())
+  name   String
+  about  String
+  resume String
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model JobPost {
-  id String @id @default(cuid())
+  id String @id @default(uuid())
 
   jobTitle        String
   employmentType  String
@@ -115,16 +132,33 @@ model JobPost {
   listingDuration Int
   benefits        String[]
 
-  status JobPostStatus @default(DRAFT)
+  status       JobPostStatus @default(DRAFT)
+  applications Int           @default(0)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  Company   Company  @relation(fields: [companyId], references: [id])
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
   companyId String
+
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  SavedJobPost SavedJobPost[]
 }
 
 enum JobPostStatus {
   DRAFT
   ACTIVE
   EXPIRED
+}
+
+model SavedJobPost {
+  id     String @id @default(uuid())
+  jobId  String
+  userId String
+
+  job  JobPost @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  user User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, jobId])
 }
